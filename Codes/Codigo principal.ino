@@ -16,7 +16,7 @@ int incomingByte;             //Variable que usaremos para guardar el dato envia
 int mode = 0;                 //Esta variable nos sirve para saber en que modo ha de funcionar el rail
 int sliderpos[3] = {0, 0, 0}; //Array de las tres posiciones del modo automatico
 int slidervel[3] = {0, 0, 0}; //Array de las tres velocidades del modo automatico
-int i = 0;                    //Esta es la variables que usaremos como guia para saber en que posicion del array debemos guardar cada dato
+int i = 0;                    //Esta es la variables que usaremos como guia para los datos en el array
 int input = 0;                //La variable INPUT indica cuando van a entrar los 6 datos del modo automatico.
                               //Esta variable es necesaria para evitar ruidos y fallos en la comunicacion
 
