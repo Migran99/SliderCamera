@@ -17,27 +17,27 @@ int mode = 0;                 //This variable is used to change between modes
 int sliderpos[3] = {0, 0, 0}; //Positions array
 int slidervel[3] = {0, 0, 0}; //Speeds array
 int i = 0;                    //We'll use this variable as a guide for the data in the arrays
-int input = 0;                //INPUT will be use to let arduino know when
-                              //Esta variable es necesaria para evitar ruidos y fallos en la comunicacion
+int input = 0;                //INPUT will be use to let arduino know when the data is going to be sent
+                              //It is need in order to avoid noise in the communication
 
 void setup() {
-  //Iniciamos el serial a una velocidad de 9600 y declaramos los pines como OUTPUT
+  //Initiate the serial at 9600 bauds
   Serial.begin(9600);
   pinMode(ledRPin, OUTPUT);
   pinMode(ledGPin, OUTPUT);
 }
 
 void manual() {
-  //Este bloque se encarga del modo manual
-  if (incomingByte == 'H') { //Si recibimos la letra H, el rail ira hacia la izquierda
+  //This block is the manual control mode
+  if (incomingByte == 'H') { //If we receive the letter H, motor will go left
     digitalWrite(ledRPin, HIGH);
-    Serial.println("Izquierda");
+    Serial.println("Left");
   }
-  if (incomingByte == 'E') {//Si recibimos la letra E, el rail ira hacia la derecha
+  if (incomingByte == 'E') {//If we receive the letter E, motor will go right
     digitalWrite(ledGPin, HIGH);
-    Serial.println("Derecha");
+    Serial.println("Right");
   }
-  if (incomingByte == 'L') {//Si recibimos la letra L, el rail parara
+  if (incomingByte == 'L') {//If we receive the letter L, motor will stop
     digitalWrite(ledRPin, LOW);
     digitalWrite(ledGPin, LOW);
     Serial.println("Stop");
