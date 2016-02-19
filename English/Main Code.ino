@@ -80,11 +80,11 @@ void loop() {
     //Mode selection(m = manual ; M=automatic)
     if (incomingByte == 'm') {
       mode = 1;
-      Serial.println("Modo manual");
+      Serial.println("Manual mode");
     }
     if (incomingByte == 'M') {
       mode = 2;
-      Serial.println("Modo automatico");
+      Serial.println("Automatic mode");
     }
 
     //Manual mode
