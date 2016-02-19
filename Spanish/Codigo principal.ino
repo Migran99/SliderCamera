@@ -14,10 +14,10 @@
 
 int incomingByte;             //Variable que usaremos para guardar el dato enviado por la App
 int mode = 0;                 //Esta variable nos sirve para saber en que modo ha de funcionar el rail
-int sliderpos[3] = {0, 0, 0}; //Array de las tres posiciones del modo automatico
+int sliderpos[4] = {0 ,0, 0, 0}; //Array de las tres posiciones del modo automatico
 int slidervel[3] = {0, 0, 0}; //Array de las tres velocidades del modo automatico
 int i = 0;                    //Esta es la variables que usaremos como guia para los datos en el array
-int input = 0;                //La variable INPUT indica cuando van a entrar los 6 datos del modo automatico.
+int input = 0;                //La variable INPUT indica cuando van a entrar los 7 datos del modo automatico.
                               //Esta variable es necesaria para evitar ruidos y fallos en la comunicacion
 
 void setup() {
@@ -45,8 +45,8 @@ void manual() {
 }
 
 int automatico() { //Este bloque se encarga de la función principal del modo automatico
-  //Si la i es menor o igual a 2 (3 primeros datos) guardamos los valores en el array sliderpos
-  if (i <= 2) {
+  //Si la i es menor o igual a 3 (4 primeros datos) guardamos los valores en el array sliderpos
+  if (i <= 3) {
    Serial.print("i= ");
     Serial.println(i);
     sliderpos[i] = incomingByte;
@@ -56,8 +56,8 @@ int automatico() { //Este bloque se encarga de la función principal del modo au
   else {
    Serial.print("i= ");
     Serial.println(i);
-    slidervel[i - 3] = incomingByte;
-    Serial.println(slidervel[i - 3]);
+    slidervel[i - 4] = incomingByte;
+    Serial.println(slidervel[i - 4]);
   }
   //Al final de cada loop aumentamos la i en 1 para que el siguiente dato se guarde en el siguiente lugar del array.
   i++;
