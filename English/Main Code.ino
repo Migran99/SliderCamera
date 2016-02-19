@@ -44,26 +44,26 @@ void manual() {
   }
 }
 
-int automatico() { //Este bloque se encarga de la función principal del modo automatico
-  //Si la i es menor o igual a 2 (3 primeros datos) guardamos los valores en el array sliderpos
+int automatico() { //This block is the automatic control mode
+  //If i is less or equal to 2 (3 first values) we save the values in the sliderpos array
   if (i <= 2) {
     Serial.println(i);
     sliderpos[i] = incomingByte;
     Serial.println(sliderpos[i]);
   }
-  //Si es mayor, lo guardamos en el array de la velocidad
+  //If it is greater than 2, we save it in slidervel array
   else {
     Serial.println(i);
     slidervel[i - 3] = incomingByte;
     Serial.println(slidervel[i - 3]);
   }
-  //Al final de cada loop aumentamos la i en 1 para que el siguiente dato se guarde en el siguiente lugar del array.
+  //We add 1 to i at the end of each loop
   i++;
   return i;
 }
 
  int reset() {
-  //En este bloque reseteamos las variables del automatico para que se puedan volver a enviar datos
+  //Reset of all the variables need in the automatic mode in order to be able to receive data again
   Serial.println("------Reset------");
   i = 0;
   input = 0;
@@ -73,11 +73,11 @@ int automatico() { //Este bloque se encarga de la función principal del modo au
 
 void loop() {
   if (Serial.available() > 0) {
-    //Si hay algo en el serial lo leemos y avisamos imprimiendo un mensaje
+    //If there is any data stored in the Serial we read it and print and message
     incomingByte = Serial.read();
-    Serial.println("Data recibido......");
+    Serial.println("Data received......");
 
-    //Selección de modo (m = manual ; M=automatico)
+    //Mode selection(m = manual ; M=automatic)
     if (incomingByte == 'm') {
       mode = 1;
       Serial.println("Modo manual");
@@ -87,22 +87,21 @@ void loop() {
       Serial.println("Modo automatico");
     }
 
-    //Modo manual
+    //Manual mode
     if (mode == 1) {
-      manual(); //Llamamos al bloque manual(); ya comentado antes
+      manual(); //It calls the block manual();
     }
 
-    //Modo Automático
+    //Automatic mode
     if (mode == 2) {
-      //Si el modo es automatico y la entrada de datos esta habilitada
+      //If data input is available
       if (input == 1) {
-        automatico(); //Llamamos al bloque automatico();
+        automatico(); //We call the block automatic();
         if (i == 6) {
-          reset(); //Reseteamos la variables si ya se ha recibido el ultimo dato
+          reset(); //Reset all the data calling the block reset();
         }
       }
-      if (incomingByte == 'z' && input == 0) input = 1; //Antes de enviar los 6 datos se envia una z para que habilite la entrada de datos
-    }
+      if (incomingByte == 'z' && input == 0) input = 1; //Before we send all the values we send a 'z' so we enable the input
     
   }
 }
