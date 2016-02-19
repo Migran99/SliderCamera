@@ -13,7 +13,7 @@
 
 int incomingByte;             //Stores the data recieved in the Serial
 int mode = 0;                 //This variable is used to change between modes
-int sliderpos[3] = {0, 0, 0}; //Positions array
+int sliderpos[4] = {0 ,0, 0, 0}; //Positions array
 int slidervel[3] = {0, 0, 0}; //Speeds array
 int i = 0;                    //We'll use this variable as a guide for the data in the arrays
 int input = 0;                //INPUT will be use to let arduino know when the data is going to be sent
@@ -44,19 +44,19 @@ void manual() {
 }
 
 int automatico() { //This block is the automatic control mode
-  //If i is less or equal to 2 (3 first values) we save the values in the sliderpos array
-  if (i <= 2) {
+  //If i is less or equal to 3 (4 first values) we save the values in the sliderpos array
+  if (i <= 3) {
     Serial.print("i= ");
     Serial.println(i);
     sliderpos[i] = incomingByte;
     Serial.println(sliderpos[i]);
   }
-  //If it is greater than 2, we save it in slidervel array
+  //If it is greater than 3, we save it in slidervel array
   else {
     Serial.print("i= ");
     Serial.println(i);
-    slidervel[i - 3] = incomingByte;
-    Serial.println(slidervel[i - 3]);
+    slidervel[i - 4] = incomingByte;
+    Serial.println(slidervel[i - 4]);
   }
   //We add 1 to i at the end of each loop
   i++;
@@ -98,7 +98,7 @@ void loop() {
       //If data input is available
       if (input == 1) {
         automatico(); //We call the block automatic();
-        if (i == 6) {
+        if (i == 7) {
           reset(); //Reset all the data calling the block reset();
         }
       }
