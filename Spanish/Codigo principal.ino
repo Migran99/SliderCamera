@@ -47,12 +47,14 @@ void manual() {
 int automatico() { //Este bloque se encarga de la función principal del modo automatico
   //Si la i es menor o igual a 2 (3 primeros datos) guardamos los valores en el array sliderpos
   if (i <= 2) {
+   Serial.print("i= ");
     Serial.println(i);
     sliderpos[i] = incomingByte;
     Serial.println(sliderpos[i]);
   }
   //Si es mayor, lo guardamos en el array de la velocidad
   else {
+   Serial.print("i= ");
     Serial.println(i);
     slidervel[i - 3] = incomingByte;
     Serial.println(slidervel[i - 3]);
