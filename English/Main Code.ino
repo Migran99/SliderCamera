@@ -1,13 +1,12 @@
 /*
- This is the code used for the communication between the App and Arduino
- In this case we are using LEDs instead of the stepper motor in order to make it more visual
+  This is the code used for the communication between the App and Arduino
+  In this case we are using LEDs instead of the stepper motor in order to make it more visual
 
- 
- Miguel Granero Ramos
- Luis Lopez Berrocal
- Marta Salas Arroyo
- IES Vicente Aleixandre 2016
- */
+  Miguel Granero Ramos
+  Luis Lopez Berrocal
+  Marta Salas Arroyo
+  IES Vicente Aleixandre 2016
+*/
 
 #define ledRPin 6
 #define ledGPin 5
@@ -18,7 +17,7 @@ int sliderpos[3] = {0, 0, 0}; //Positions array
 int slidervel[3] = {0, 0, 0}; //Speeds array
 int i = 0;                    //We'll use this variable as a guide for the data in the arrays
 int input = 0;                //INPUT will be use to let arduino know when the data is going to be sent
-                              //It is need in order to avoid noise in the communication
+//It is need in order to avoid noise in the communication
 
 void setup() {
   //Initiate the serial at 9600 bauds
@@ -47,12 +46,14 @@ void manual() {
 int automatico() { //This block is the automatic control mode
   //If i is less or equal to 2 (3 first values) we save the values in the sliderpos array
   if (i <= 2) {
+    Serial.print("i= ");
     Serial.println(i);
     sliderpos[i] = incomingByte;
     Serial.println(sliderpos[i]);
   }
   //If it is greater than 2, we save it in slidervel array
   else {
+    Serial.print("i= ");
     Serial.println(i);
     slidervel[i - 3] = incomingByte;
     Serial.println(slidervel[i - 3]);
@@ -62,7 +63,7 @@ int automatico() { //This block is the automatic control mode
   return i;
 }
 
- int reset() {
+int reset() {
   //Reset of all the variables need in the automatic mode in order to be able to receive data again
   Serial.println("------Reset------");
   i = 0;
@@ -102,6 +103,7 @@ void loop() {
         }
       }
       if (incomingByte == 'z' && input == 0) input = 1; //Before we send all the values we send a 'z' so we enable the input
-    
+
+    }
   }
 }
