@@ -1,85 +1,87 @@
-/*
- Esta es la programacion realizada para la conexion entre la App y Arduino mediante Bluetooth. En este caso se hace uso de LEDs en vez del motor
- para demostrar su funcionamiento
+//El motor da 5.3 vueltas para recorrer todo el slider
 
- 
- Miguel Granero Ramos
- Luis Lopez Berrocal
- Marta Salas Arroyo
- IES Vicente Aleixandre 2016
- */
+//Vamos a usar la libreria stepper.h para controlar el motor
+#include <Stepper.h>
+#define STEPS 200 //El motor da 200 pasos por cada vuelta completa
+#define fdcPin 7
 
-#define ledRPin 6
-#define ledGPin 5
+Stepper stepper(STEPS, 8, 9, 10, 11); //Definimos los pines del motor
 
-int incomingByte;             //Variable que usaremos para guardar el dato enviado por la App
-int mode = 0;                 //Esta variable nos sirve para saber en que modo ha de funcionar el rail
-int sliderpos[4] = {0 ,0, 0, 0}; //Array de las tres posiciones del modo automatico
-int slidervel[3] = {0, 0, 0}; //Array de las tres velocidades del modo automatico
-int i = 0;                    //Esta es la variables que usaremos como guia para los datos en el array
-int input = 0;                //La variable INPUT indica cuando van a entrar los 7 datos del modo automatico.
-                              //Esta variable es necesaria para evitar ruidos y fallos en la comunicacion
+int incomingByte; //Variable que usamos para guardar los datos enviados desde la App
+int mode = 0; //Para cambiar entre modos de funcionamiento
+
+int vel = 0; //Velocidad del slider
+int posicion = 0; //Variable que guarda la posicion de la camara en el slider
+int stepp = 0; //Variable que usaremos para saber en que direccion moverse en modo manual
+
+
+int i = 0; //Variable de apoyo que usaremos en algunas estructuras del codigo
+
+//Variables modo automatico
+int running = 0; //Indica si se ha iniciado el recorrido del slider
+int input = 0; //Si esta habilitada la entrada de datos o no
+int sliderpos[4] = {
+  0, 0, 0, 0
+}; //Array de las tres posiciones del modo automatico y la posicion inical
+int slidervel[3] = {
+  0, 0, 0
+}; //Array de las tres velocidades del modo automatico
+
+
+int fdcState = 0; //Estado del final de carrera (pulsado o no)
 
 void setup() {
-  //Iniciamos el serial a una velocidad de 9600 y declaramos los pines como OUTPUT
-  Serial.begin(9600);
-  pinMode(ledRPin, OUTPUT);
-  pinMode(ledGPin, OUTPUT);
+  Serial.begin(9600); //Iniciamos el Serial para imprimir mensajes de informacion
 }
 
-void manual() {
-  //Este bloque se encarga del modo manual
-  if (incomingByte == 'H') { //Si recibimos la letra H, el rail ira hacia la izquierda
-    digitalWrite(ledRPin, HIGH);
-    Serial.println("Izquierda");
+int manual() {
+  //En este bloque indicamos al motor en que direccion girar en funcion de los datos recibidos
+  if (incomingByte == 'H') { //H --> Derecha
+    stepp = 1;
   }
-  if (incomingByte == 'E') {//Si recibimos la letra E, el rail ira hacia la derecha
-    digitalWrite(ledGPin, HIGH);
-    Serial.println("Derecha");
+  if (incomingByte == 'E') { //E --> Izquierda
+    stepp = -1;
   }
-  if (incomingByte == 'L') {//Si recibimos la letra L, el rail parara
-    digitalWrite(ledRPin, LOW);
-    digitalWrite(ledGPin, LOW);
-    Serial.println("Stop");
+  if (incomingByte == 'L') { //L --> Parar
+    stepp = 0;
+  }
+  //Este le indica la velocidad
+  if (incomingByte <= 100) {
+    vel = incomingByte;
+    stepper.setSpeed(vel);
   }
 }
 
 int automatico() { //Este bloque se encarga de la función principal del modo automatico
   //Si la i es menor o igual a 3 (4 primeros datos) guardamos los valores en el array sliderpos
   if (i <= 3) {
-   Serial.print("i= ");
     Serial.println(i);
-    sliderpos[i] = incomingByte;
+    sliderpos[i] = 4 * incomingByte;
     Serial.println(sliderpos[i]);
   }
   //Si es mayor, lo guardamos en el array de la velocidad
   else {
-   Serial.print("i= ");
     Serial.println(i);
     slidervel[i - 4] = incomingByte;
     Serial.println(slidervel[i - 4]);
   }
   //Al final de cada loop aumentamos la i en 1 para que el siguiente dato se guarde en el siguiente lugar del array.
   i++;
-  return i;
 }
 
- int reset() {
-  //En este bloque reseteamos las variables del automatico para que se puedan volver a enviar datos
-  Serial.println("------Reset------");
+int play() {
+  //En este bloque reseteamos las variables e iniciamos el proceso
+  Serial.println("------Play------");
   i = 0;
   input = 0;
-  return i;
-  return input;
+  running = 1;
 }
 
 void loop() {
+  //Leemos el serial si hay algun dato
   if (Serial.available() > 0) {
-    //Si hay algo en el serial lo leemos y avisamos imprimiendo un mensaje
     incomingByte = Serial.read();
-    Serial.println("Data recibido......");
-
-    //Selección de modo (m = manual ; M=automatico)
+    //Selección de modo
     if (incomingByte == 'm') {
       mode = 1;
       Serial.println("Modo manual");
@@ -87,24 +89,70 @@ void loop() {
     if (incomingByte == 'M') {
       mode = 2;
       Serial.println("Modo automatico");
-    }
-
-    //Modo manual
-    if (mode == 1) {
-      manual(); //Llamamos al bloque manual(); ya comentado antes
-    }
-
-    //Modo Automático
-    if (mode == 2) {
-      //Si el modo es automatico y la entrada de datos esta habilitada
-      if (input == 1) {
-        automatico(); //Llamamos al bloque automatico();
-        if (i == 6) {
-          reset(); //Reseteamos la variables si ya se ha recibido el ultimo dato
-        }
+      stepper.setSpeed(50);
+      digitalRead(fdcPin);
+      while (fdcState == 0) { //Realizamos una calibracion cada vez de empieza el modo automatico
+        stepper.step(1);
+        fdcState = digitalRead(fdcPin);
       }
-      if (incomingByte == 'z' && input == 0) input = 1; //Antes de enviar los 6 datos se envia una z para que habilite la entrada de datos
+      posicion = 250;
+
     }
-    
+    //Manual
+    if (mode == 1) {
+      manual(); //Llamamos al bloque manual
+    }
+    //Automatico
+    if (mode == 2) {
+      if (input == 1) {
+        automatico(); //Llamamos al bloque automatico
+      }
+      if (i == 7) {
+        play(); //Reseteamos la variables si ya se ha recibido el ultimo dato
+
+      }
+    }
+    if (incomingByte == 'z' && input == 0) input = 1; //Antes de enviar los 6 datos se envia una z para que habilite la entrada de datos
   }
+
+
+  //**************************
+
+  if (mode == 1 && stepp != 0) stepper.step(stepp);
+  if (mode == 2 && running == 1) {
+    switch (i) {
+      //En este codigo vamos a hacer que el slider vaya haciendo cada fase llendo una posicion con la velocidad dada.
+      case 0://Posicion inicial
+        stepper.setSpeed(60);
+        stepper.step(sliderpos[i] - posicion);
+        posicion = sliderpos[i];
+        i++;
+        Serial.println(posicion);
+        Serial.println(i);
+      case 1://Fase 1
+        stepper.setSpeed(slidervel[i - 1]);
+        stepper.step(sliderpos[i] - posicion);
+        posicion = sliderpos[i];
+        i++;
+        Serial.println(posicion);
+        Serial.println(i);
+      case 2://Fase 2
+        stepper.setSpeed(slidervel[i - 1]);
+        stepper.step(sliderpos[i] - posicion);
+        posicion = sliderpos[i];
+        i++;
+        Serial.println(posicion);
+        Serial.println(i);
+      case 3://Fase 3
+        stepper.setSpeed(slidervel[i - 1]);
+        stepper.step(sliderpos[i] - posicion);
+        posicion = sliderpos[i];
+        i++;
+        Serial.println(posicion);
+        Serial.println(i);
+        i = 0;
+        running = 0;
+    }
+  }
+  //Serial.println(posicion);
 }
