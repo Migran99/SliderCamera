@@ -90,7 +90,7 @@ void loop() {
       mode = 2;
       Serial.println("Modo automatico");
       stepper.setSpeed(50);
-      digitalRead(fdcPin);
+      fdcState = digitalRead(fdcPin);
       while (fdcState == 0) { //Realizamos una calibracion cada vez de empieza el modo automatico
         stepper.step(1);
         fdcState = digitalRead(fdcPin);
